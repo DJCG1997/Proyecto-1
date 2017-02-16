@@ -31,18 +31,30 @@ void dibujarJugador(jugador_t *jugador) {
 
 void moverArriba(jugador_t *jugador) {
     // su codigo aqui
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    al_draw_bitmap(jugador->nave, jugador->x, +4, 0);
+    al_flip_display();
 }
 
 void moverAbajo(jugador_t *jugador) {
     // su codigo aqui
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    al_draw_bitmap(jugador->nave, jugador->x, -4, 0);
+    al_flip_display();
 }
 
 void moverDerecha(jugador_t *jugador) {
     // su codigo aqui
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    al_draw_bitmap(jugador->nave, +4, jugador->y, 0);
+    al_flip_display();
 }
 
 void moverIzquierda(jugador_t *jugador) {
     // su codigo aqui
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    al_draw_bitmap(jugador->nave, -4, jugador->y, 0);
+    al_flip_display();
 }
 
 int main(int argc, char **argv) {
@@ -139,44 +151,57 @@ int main(int argc, char **argv) {
             switch(ev.keyboard.keycode) {
                 case ALLEGRO_KEY_ESCAPE:
                     // su codigo aqui
+                    terminar = 1;
                 break;
                 case ALLEGRO_KEY_UP:
                     // su codigo aqui
+                    teclas[UP] = 0;
                 break;
                 case ALLEGRO_KEY_DOWN:
                     // su codigo aqui
+                    teclas[DOWN] = 0;
                 break;
                 case ALLEGRO_KEY_LEFT:
                     // su codigo aqui
+                    teclas[LEFT] = 0;
                 break;
                 case ALLEGRO_KEY_RIGHT:
                     // su codigo aqui
+                    teclas[RIGHT] = 0;
                 break;
             }
         } else if (ev.type == ALLEGRO_EVENT_KEY_DOWN) {
             switch(ev.keyboard.keycode) {
                 case ALLEGRO_KEY_UP:
                     // su codigo aqui
+                    teclas[UP] = 1;
                 break;
                 case ALLEGRO_KEY_DOWN:
                     // su codigo aqui
+                    teclas[DOWN] = 1;
                 break;
                 case ALLEGRO_KEY_LEFT:
                     // su codigo aqui
+                    teclas[LEFT] = 1;
                 break;
                 case ALLEGRO_KEY_RIGHT:
                     // su codigo aqui
+                    teclas[RIGHT] = 1;
                 break;
             }
         } else if(ev.type == ALLEGRO_EVENT_TIMER) {
             if(teclas[UP])
                 // su codigo aqui
+                player->y -= 4.0;
             else if(teclas[DOWN])
                 // su codigo aqui
+                player->y += 4.0;
             else if(teclas[LEFT])
                 // su codigo aqui
+                player->x -= 4.0;
             else if(teclas[RIGHT])
                 // su codigo aqui
+                player->x += 4.0;
         }
         // dibujamos al jugador
         dibujarJugador(player);
