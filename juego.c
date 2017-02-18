@@ -11,115 +11,134 @@ enum KEYS{
     UP,   // 0
     DOWN, // 1
     LEFT, // 2
-    RIGHT // 3
+    RIGHT, // 3
+    //--------------------MIO
+    X   //4
+    //--------------------MIO
 };
 
-int teclas[4] = {0, 0, 0, 0};
+int teclas[5] = {0, 0, 0, 0, 0};
 
+//CREACION DE ESTRUCTURAS DE IMAGENES-------------------------------------------
 typedef struct jugador {
     int x; // posicion x de la nave
     int y; // posicion y de la nave
     ALLEGRO_BITMAP *nave; // imagen a renderizar
 } jugador_t;
 
-// funcion ayuda que dibuja a nuestra navecita
+typedef struct shot {
+  int x;
+  int y;
+  ALLEGRO_BITMAP *bala;
+} shot_t;
+//------------------------------------------------------------------------------
+
+//FUNCION PARA CREAR LA NAVE----------------------------------------------------
 void dibujarJugador(jugador_t *jugador) {
     al_clear_to_color(al_map_rgb(0, 0, 0));
     al_draw_bitmap(jugador->nave, jugador->x, jugador->y, 0);
     al_flip_display();
 }
 
-void moverArriba(jugador_t *jugador) {
-    // su codigo aqui
-    al_clear_to_color(al_map_rgb(0, 0, 0));
-    al_draw_bitmap(jugador->nave, jugador->x, +4, 0);
-    al_flip_display();
+void dibujarBala(shot_t *shot){
+  //dibujarJugador(player);
+  al_clear_to_color(al_map_rgb(0, 0, 0));
+  al_draw_bitmap(shot->bala, shot->x, shot->y, 0);
+  al_flip_display();
 }
+//------------------------------------------------------------------------------
 
-void moverAbajo(jugador_t *jugador) {
-    // su codigo aqui
-    al_clear_to_color(al_map_rgb(0, 0, 0));
-    al_draw_bitmap(jugador->nave, jugador->x, -4, 0);
-    al_flip_display();
-}
-
+//CREACION DE METODOS DE MOVIMIENTO---------------------------------------------
 void moverDerecha(jugador_t *jugador) {
-    // su codigo aqui
-    al_clear_to_color(al_map_rgb(0, 0, 0));
-    al_draw_bitmap(jugador->nave, +4, jugador->y, 0);
-    al_flip_display();
+    (*jugador).x += 20;
 }
 
 void moverIzquierda(jugador_t *jugador) {
-    // su codigo aqui
-    al_clear_to_color(al_map_rgb(0, 0, 0));
-    al_draw_bitmap(jugador->nave, -4, jugador->y, 0);
-    al_flip_display();
+    (*jugador).x -= 20;
 }
 
-int main(int argc, char **argv) {
-    // Nuestra pantalla
-    ALLEGRO_DISPLAY *display = NULL;
-    // Con esto podemos manejar eventos
-    ALLEGRO_EVENT_QUEUE *event_queue = NULL;
-    // Timer para actulizar eventos
-    ALLEGRO_TIMER *timer = NULL;
+void moverBala(shot_t *shot, int posY, jugador_t *jugador){
+  (*shot).y -=16;
+  dibujarJugador(jugador);
+  dibujarBala(shot);
+}
+//------------------------------------------------------------------------------
 
-    // Tratamos de inicializar allegro
+//METODO MAIN PRINCIPAL---------------------------------------------------------------------
+int main(int argc, char **argv) {
+
+    ALLEGRO_DISPLAY *display = NULL;          // Nuestra pantalla
+    ALLEGRO_EVENT_QUEUE *event_queue = NULL;  // Con esto podemos manejar eventos
+    ALLEGRO_TIMER *timer = NULL;              // Timer para actulizar eventos
+
+    //DECLARACION DE TAMAÑO DE PANTALLA-----------------------------------------
+    int anchoX = 740;
+    int anchoY = 480;
+    //--------------------------------------------------------------------------
+
+    //SE TRATA DE INICIALIZZAR ALLEGO-------------------------------------------
     if(!al_init()) {
         fprintf(stderr, "%s\n", "No se pudo inicializar allegro 5");
         return -1;
     }
+    //--------------------------------------------------------------------------
 
-    // Creamos un nuevo display de 640x480 para empezar
-    display = al_create_display(640, 480);
-    // Si no se pudo crear el display al_create_display devuelve false (0)
+    //SE CREA LA PANTALLA-------------------------------------------------------
+    display = al_create_display(anchoX, anchoY);
+    //--------------------------------------------------------------------------
+
+    //SI NO SE PUEDE CREAR LA PANTALLA al_create_display DEVUELVE FALSE (0)
     if(!display) {
         fprintf(stderr, "%s\n", "No se pudo crear un display");
         return -1;
     }
+    //--------------------------------------------------------------------------
 
-    // Tratamos de agregar el addon de imagenes de allegro
+    //SE TRATA DE AGREGAR EL ADDON DE IMAGENES DE ALLEGO------------------------
     if(!al_init_image_addon()) {
         fprintf(stderr, "%s\n", "No se pudo inicializar el addon de imagenes");
-        // tenemos que destruir el display que creamos
         al_destroy_display(display);
         return -1;
     }
+    //--------------------------------------------------------------------------
 
-    // Tratamos de instalar el teclado en allegro
+    //SE TRATA DE CARGAR EL TECLADO DE ALLEGRO----------------------------------
     if(!al_install_keyboard()) {
         fprintf(stderr, "%s\n", "No se pudo instalar el teclado");
-        // tenemos que destruir el display que creamos
         al_destroy_display(display);
         return -1;
     }
+    //--------------------------------------------------------------------------
 
-    // evitamos que se suspenda la computadora mientras esta el juego abierto
-    al_inhibit_screensaver(1);
-    // le ponemos un titulo a nuestro display
-    al_set_window_title(display, "Ejercicio 4: Juego en C");
-    // al principio queremos que tenga fondo negro
-    al_clear_to_color(al_map_rgb(0, 0, 0));
-    // hacemos que se muestre lo que dibujamos
-    al_flip_display();
+    //CONTROLLES DE PANTALLA----------------------------------------------------
+    al_inhibit_screensaver(1);    //EVITAMOS QUE SE SUSPENDA MIESNTRAS SE JUEGA
+    al_set_window_title(display, "GALAGA"); //SE LE PONE TITULO A LA PANTALLA
+    al_clear_to_color(al_map_rgb(0, 0, 0)); //SE LE CARGA UN FONDO NEGRO
+    al_flip_display();  //SE MUESTRA LO QUE CREAMOS
 
-    // creamos el timer
+    //CREACION DEL TIMER--------------------------------------------------------
     timer = al_create_timer(1.0 / FPS);
+    //--------------------------------------------------------------------------
 
-    // Creamos los eventos del juego
+    //CREACION DE EVENTOS DEL JUEGO---------------------------------------------
     event_queue = al_create_event_queue();
     al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
+    //--------------------------------------------------------------------------
 
-    // Creamos un jugador (miren como se usa malloc :) )
-    // e inicializamos su posicion (0, 0)
+    //SE CREA EL JUGADOR Y SE INICIALIZA----------------------------------------
     jugador_t *player = (jugador_t *)malloc(sizeof(jugador_t));
-    player->nave = al_load_bitmap("spacecraft.png");
-    player->x = 0;
-    player->y = 0;
+    player->nave = al_load_bitmap("SpriteNave.png");
+    player->x = (anchoX-200)/2;
+    player->y = anchoY - 60;
 
-    // si la imagen de la nave no se pudo cargar
+    shot_t *disparo = (shot_t *)malloc(sizeof(shot_t));
+    disparo->bala = al_load_bitmap("SpriteBala.png");
+    disparo->x = 0;
+    disparo->y = 0;
+    //--------------------------------------------------------------------------
+
+    //SI NO SE PUEDEN CARGAR LAS IMAGENES---------------------------------------
     if(!player->nave) {
         fprintf(stderr, "%s\n", "No se pudo crear un display");
         al_destroy_display(display);
@@ -128,90 +147,94 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    // dibujemos al jugador por primera vez
+    if(!disparo->bala){
+      fprintf(stderr, "%s\n", "No se pudo crear un display");
+      al_destroy_display(display);
+      al_destroy_event_queue(event_queue);
+      al_destroy_timer(timer);
+      return -1;
+    }
+    //--------------------------------------------------------------------------
+
+    //SE DIBUJA AL JUGADOR------------------------------------------------------
     dibujarJugador(player);
+    //--------------------------------------------------------------------------
 
-    // srand a un numero que tire el reloj
+    //SRAND HACIA UN NUMERO QUE LANCE EL RELOJ----------------------------------
     srand(time(NULL));
+    //--------------------------------------------------------------------------
 
-    // comenzamos el timer
+    //SE INICIALIZA EL TIMER----------------------------------------------------
     al_start_timer(timer);
+    //--------------------------------------------------------------------------
 
-    // bandera para salir del juego se preciona escape
+    //BANDERA DE SALIDA AL PRECIONAR esc----------------------------------------
     int terminar = 0;
+    //--------------------------------------------------------------------------
 
-    // una variable que recibe eventos (?)
+    //VARIABLE QUE RECIBE EVENTOS-----------------------------------------------
     ALLEGRO_EVENT ev;
+    //--------------------------------------------------------------------------
 
-    // loop del juego
+//BUCLE DEL JUEGO---------------------------------------------------------------
     while(!terminar) {
         al_wait_for_event(event_queue, &ev);
-        // si el evento es key_up
         if(ev.type == ALLEGRO_EVENT_KEY_UP) {
             switch(ev.keyboard.keycode) {
                 case ALLEGRO_KEY_ESCAPE:
-                    // su codigo aqui
                     terminar = 1;
                 break;
-                case ALLEGRO_KEY_UP:
-                    // su codigo aqui
-                    teclas[UP] = 0;
-                break;
-                case ALLEGRO_KEY_DOWN:
-                    // su codigo aqui
-                    teclas[DOWN] = 0;
-                break;
                 case ALLEGRO_KEY_LEFT:
-                    // su codigo aqui
                     teclas[LEFT] = 0;
                 break;
                 case ALLEGRO_KEY_RIGHT:
-                    // su codigo aqui
                     teclas[RIGHT] = 0;
+                break;
+                case ALLEGRO_KEY_X:
+                  teclas[X] = 0;
                 break;
             }
         } else if (ev.type == ALLEGRO_EVENT_KEY_DOWN) {
             switch(ev.keyboard.keycode) {
-                case ALLEGRO_KEY_UP:
-                    // su codigo aqui
-                    teclas[UP] = 1;
-                break;
-                case ALLEGRO_KEY_DOWN:
-                    // su codigo aqui
-                    teclas[DOWN] = 1;
-                break;
                 case ALLEGRO_KEY_LEFT:
-                    // su codigo aqui
                     teclas[LEFT] = 1;
                 break;
                 case ALLEGRO_KEY_RIGHT:
-                    // su codigo aqui
                     teclas[RIGHT] = 1;
+                break;
+                case ALLEGRO_KEY_X:
+                  teclas[X] = 1;
+                  disparo->x = player->x;
+                  disparo->y = player->y;
                 break;
             }
         } else if(ev.type == ALLEGRO_EVENT_TIMER) {
-            if(teclas[UP])
-                // su codigo aqui
-                player->y -= 4.0;
-            else if(teclas[DOWN])
-                // su codigo aqui
-                player->y += 4.0;
-            else if(teclas[LEFT])
-                // su codigo aqui
-                player->x -= 4.0;
-            else if(teclas[RIGHT])
-                // su codigo aqui
-                player->x += 4.0;
-        }
-        // dibujamos al jugador
-        dibujarJugador(player);
-    }
+            if(teclas[LEFT] && player->x >= 20.0)
+                moverIzquierda(player);
+            else if(teclas[RIGHT] && player->x <= anchoX -250 - 20.0)
+                moverDerecha(player);
+            else if(teclas[X]){
+              while(disparo->y >= 0){
+                moverBala(disparo, disparo->y, player);
+              }
 
-    // siemple hay que limpiar memoria
+            }
+        }
+
+        //SE DIBUJA AL JUGADOR--------------------------------------------------
+        dibujarJugador(player);
+        //----------------------------------------------------------------------
+    }
+    //--------------------------------------------------------------------------
+
+    //SE LIMPIA LA MEMORIA------------------------------------------------------
     al_destroy_display(display);
     al_destroy_event_queue(event_queue);
     al_destroy_bitmap(player->nave);
+    al_destroy_bitmap(disparo->bala);
     al_destroy_timer(timer);
     free(player);
+    free(disparo);
+    //--------------------------------------------------------------------------
     return 0;
 }
