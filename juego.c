@@ -31,6 +31,12 @@ typedef struct shot {
   int y;
   ALLEGRO_BITMAP *bala;
 } shot_t;
+
+typedef struct enemigos {
+  int x;
+  int y;
+  ALLEGRO_BITMAP *aliens;
+} enemigos_t;
 //------------------------------------------------------------------------------
 
 //FUNCION PARA CREAR LA NAVE----------------------------------------------------
@@ -41,10 +47,16 @@ void dibujarJugador(jugador_t *jugador) {
 }
 
 void dibujarBala(shot_t *shot){
-  //dibujarJugador(player);
   al_clear_to_color(al_map_rgb(0, 0, 0));
   al_draw_bitmap(shot->bala, shot->x, shot->y, 0);
   al_flip_display();
+}
+
+void dibujarEnemigos(enemigos_t *enemigos, int anchoX){
+  for(int i=anchoX-250; i>=15; i=i-30){
+    al_draw_bitmap(enemigos->aliens, i, 100, 0);
+    al_flip_display();
+  }
 }
 //------------------------------------------------------------------------------
 
@@ -70,6 +82,7 @@ int main(int argc, char **argv) {
     ALLEGRO_DISPLAY *display = NULL;          // Nuestra pantalla
     ALLEGRO_EVENT_QUEUE *event_queue = NULL;  // Con esto podemos manejar eventos
     ALLEGRO_TIMER *timer = NULL;              // Timer para actulizar eventos
+    //ALLEGRO_DISPLAY *fondo = al_create_display(SpriteFondo, NULL);
 
     //DECLARACION DE TAMAÑO DE PANTALLA-----------------------------------------
     int anchoX = 740;
@@ -136,6 +149,11 @@ int main(int argc, char **argv) {
     disparo->bala = al_load_bitmap("SpriteBala.png");
     disparo->x = 0;
     disparo->y = 0;
+
+    enemigos_t *malos = (enemigos_t *)malloc(sizeof(enemigos_t));
+    malos->aliens = al_load_bitmap("SpriteAlien1.png");
+    malos->x = 0;
+    malos->y = 0;
     //--------------------------------------------------------------------------
 
     //SI NO SE PUEDEN CARGAR LAS IMAGENES---------------------------------------
@@ -145,6 +163,14 @@ int main(int argc, char **argv) {
         al_destroy_event_queue(event_queue);
         al_destroy_timer(timer);
         return -1;
+    }
+
+    if(!malos->aliens){
+      fprintf(stderr, "%s\n", "No se pudo crear un display");
+      al_destroy_display(display);
+      al_destroy_event_queue(event_queue);
+      al_destroy_timer(timer);
+      return -1;
     }
 
     if(!disparo->bala){
@@ -157,7 +183,9 @@ int main(int argc, char **argv) {
     //--------------------------------------------------------------------------
 
     //SE DIBUJA AL JUGADOR------------------------------------------------------
+    dibujarEnemigos(malos, anchoX);
     dibujarJugador(player);
+
     //--------------------------------------------------------------------------
 
     //SRAND HACIA UN NUMERO QUE LANCE EL RELOJ----------------------------------
